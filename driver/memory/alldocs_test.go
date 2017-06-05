@@ -22,6 +22,16 @@ func TestAllDocs(t *testing.T) {
 		{
 			Name: "NoDocs",
 		},
+		{
+			Name: "OneDoc",
+			DB: func() driver.DB {
+				db := setupDB(t, nil)
+				if _, err := db.Put(context.Background(), "foo", map[string]string{"foo": "bar"}); err != nil {
+					t.Fatal(err)
+				}
+				return db
+			}(),
+		},
 	}
 	for _, test := range tests {
 		func(test adTest) {
@@ -41,11 +51,11 @@ func TestAllDocs(t *testing.T) {
 				if err != nil {
 					return
 				}
-				var row *driver.Row
+				var row driver.Row
 				var ids []string
 				msg = ""
 				for {
-					e := rows.Next(row)
+					e := rows.Next(&row)
 					if e != nil {
 						if e != io.EOF {
 							msg = e.Error()

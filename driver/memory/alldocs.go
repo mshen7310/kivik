@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/flimzy/kivik/driver"
 )
 
 func (d *db) AllDocs(ctx context.Context, opts map[string]interface{}) (driver.Rows, error) {
-	var rows resultSet
+	rows := &resultSet{
+		docIDs: make([]string, 0),
+		revs:   make([]*revision, 0),
+	}
 	for docID := range d.db.docs {
 		if doc, found := d.db.latestRevision(docID); found {
 			rows.docIDs = append(rows.docIDs, docID)
@@ -37,9 +41,10 @@ func (r resultSet) Close() error {
 }
 
 func (r resultSet) Next(row *driver.Row) error {
-	if r.revs == nil {
+	if r.revs == nil || len(r.revs) == 0 {
 		return io.EOF
 	}
+	spew.Dump(r.docIDs)
 	row.ID, r.docIDs = r.docIDs[0], r.docIDs[1:]
 	var next *revision
 	next, r.revs = r.revs[0], r.revs[1:]
