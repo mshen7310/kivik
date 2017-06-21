@@ -61,6 +61,11 @@ func (c *Changes) ID() string {
 	return c.curVal.(*driver.Row).ID
 }
 
+// Seq returns the SEQ of the current result
+func (c *Changes) Seq() driver.SequenceID {
+	return c.curVal.(*driver.Change).Seq
+}
+
 // ScanDoc works the same as ScanValue, but on the doc field of the result. It
 // is only valid for results that include documents.
 func (c *Changes) ScanDoc(dest interface{}) error {
